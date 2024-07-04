@@ -46,6 +46,12 @@ class Board:
 
         return board
 
+    def in_bounds(self, square):
+        if square.row < BOARD_SIZE and square.col < BOARD_SIZE:
+            if square.row > -1 and square.col > -1:
+                return True
+        return False
+
     def set_piece(self, square, piece):
         """
         Places the piece at the given position on the board.

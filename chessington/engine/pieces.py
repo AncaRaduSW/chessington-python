@@ -40,21 +40,21 @@ class Pawn(Piece):
         current_square = board.find_piece(self)
         if self.player == Player.BLACK:
             square_in_front = Square.at(current_square.row - 1, current_square.col)
-            if board.get_piece(square_in_front) == None:
+            if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
                 moves_list.append(square_in_front)
 
                 if self.moved == False:
                     square_in_front = Square.at(current_square.row - 2, current_square.col)
-                    if board.get_piece(square_in_front) == None:
+                    if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
                         moves_list.append(square_in_front)
         else:
             square_in_front = Square.at(current_square.row + 1, current_square.col)
-            if board.get_piece(square_in_front) == None:
+            if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
                 moves_list.append(square_in_front)
 
                 if self.moved == False:
                     square_in_front = Square.at(current_square.row + 2, current_square.col)
-                    if board.get_piece(square_in_front) == None:
+                    if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
                         moves_list.append(square_in_front)
 
         return moves_list
