@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from chessington.engine.data import Player, Square
 from typing import TYPE_CHECKING, List
 
+BOARD_SIZE = 8
+
 if TYPE_CHECKING:
     from chessington.engine.board import Board
 
@@ -207,7 +209,66 @@ class Bishop(Piece):
     """
 
     def get_available_moves(self, board):
-        return []
+        moves_list = []
+        current_square = board.find_piece(self)
+
+        # Go up right
+        row = current_square.row + 1
+        col = current_square.col + 1
+        square = Square.at(row, col)
+        while board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+            else:
+                break
+
+            row += 1
+            col += 1
+            square = Square.at(row, col)
+
+        # Go up left
+        row = current_square.row + 1
+        col = current_square.col - 1
+        square = Square.at(row, col)
+        while board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+            else:
+                break
+
+            row += 1
+            col -= 1
+            square = Square.at(row, col)
+
+        # Go down right
+        row = current_square.row - 1
+        col = current_square.col + 1
+        square = Square.at(row, col)
+        while board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+            else:
+                break
+
+            row -= 1
+            col += 1
+            square = Square.at(row, col)
+
+        # Go down left
+        row = current_square.row - 1
+        col = current_square.col - 1
+        square = Square.at(row, col)
+        while board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+            else:
+                break
+
+            row -= 1
+            col -= 1
+            square = Square.at(row, col)
+
+        return moves_list
 
 
 class Rook(Piece):
@@ -216,7 +277,62 @@ class Rook(Piece):
     """
 
     def get_available_moves(self, board):
-        return []
+        moves_list = []
+        current_square = board.find_piece(self)
+
+        # Go up
+        row = current_square.row + 1
+        col = current_square.col
+        square = Square.at(row, col)
+        while board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+            else:
+                break
+
+            row += 1
+            square = Square.at(row, col)
+
+        # Go down
+        row = current_square.row - 1
+        col = current_square.col
+        square = Square.at(row, col)
+        while board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+            else:
+                break
+
+            row -= 1
+            square = Square.at(row, col)
+
+        # Go right
+        row = current_square.row
+        col = current_square.col + 1
+        square = Square.at(row, col)
+        while board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+            else:
+                break
+
+            col += 1
+            square = Square.at(row, col)
+
+        # Go left
+        row = current_square.row
+        col = current_square.col - 1
+        square = Square.at(row, col)
+        while board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+            else:
+                break
+
+            col -= 1
+            square = Square.at(row, col)
+
+        return moves_list
 
 
 class Queen(Piece):
