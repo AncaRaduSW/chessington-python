@@ -38,24 +38,51 @@ class Pawn(Piece):
     def get_available_moves(self, board) -> List[Square]:
         moves_list = []
         current_square = board.find_piece(self)
+
         if self.player == Player.BLACK:
+            # Check the square one below
             square_in_front = Square.at(current_square.row - 1, current_square.col)
-            if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
-                moves_list.append(square_in_front)
+            if board.in_bounds(square_in_front):
 
-                if self.moved == False:
-                    square_in_front = Square.at(current_square.row - 2, current_square.col)
-                    if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
-                        moves_list.append(square_in_front)
+                square_in_right = Square.at(current_square.row - 1, current_square.col + 1)
+                square_in_left = Square.at(current_square.row - 1, current_square.col - 1)
+
+
+
+                if board.in_bounds(square_in_right) and board.get_piece(square_in_right) != None and board.get_piece(square_in_right).player != self.player:
+                    moves_list.append(square_in_right)
+                if board.in_bounds(square_in_left) and board.get_piece(square_in_left) != None and board.get_piece(square_in_left).player != self.player:
+                    moves_list.append(square_in_left)
+
+                if board.get_piece(square_in_front) == None:
+                    moves_list.append(square_in_front)
+
+                    # Check the square two below
+                    if self.moved == False:
+                        square_in_front = Square.at(current_square.row - 2, current_square.col)
+                        if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
+                            moves_list.append(square_in_front)
         else:
+            # Check the square one above
             square_in_front = Square.at(current_square.row + 1, current_square.col)
-            if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
-                moves_list.append(square_in_front)
+            if board.in_bounds(square_in_front):
 
-                if self.moved == False:
-                    square_in_front = Square.at(current_square.row + 2, current_square.col)
-                    if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
-                        moves_list.append(square_in_front)
+                square_in_right = Square.at(current_square.row + 1, current_square.col + 1)
+                square_in_left = Square.at(current_square.row + 1, current_square.col - 1)
+
+                if board.in_bounds(square_in_right) and board.get_piece(square_in_right) != None and board.get_piece(square_in_right).player != self.player:
+                    moves_list.append(square_in_right)
+                if board.in_bounds(square_in_left) and board.get_piece(square_in_left) != None and board.get_piece(square_in_left).player != self.player:
+                    moves_list.append(square_in_left)
+
+                if board.get_piece(square_in_front) == None:
+                    moves_list.append(square_in_front)
+
+                    # Check the square two above
+                    if self.moved == False:
+                        square_in_front = Square.at(current_square.row + 2, current_square.col)
+                        if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
+                            moves_list.append(square_in_front)
 
         return moves_list
 
