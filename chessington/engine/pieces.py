@@ -33,14 +33,39 @@ class Pawn(Piece):
     """
     A class representing a chess pawn.
     """
+    moved = False
+
     def get_available_moves(self, board) -> List[Square]:
+        moves_list = []
         current_square = board.find_piece(self)
         if self.player == Player.BLACK:
             square_in_front = Square.at(current_square.row - 1, current_square.col)
-            return [square_in_front]
+            if board.get_piece(square_in_front) == None:
+                moves_list.append(square_in_front)
+
+                if self.moved == False:
+                    square_in_front = Square.at(current_square.row - 2, current_square.col)
+                    if board.get_piece(square_in_front) == None:
+                        moves_list.append(square_in_front)
         else:
             square_in_front = Square.at(current_square.row + 1, current_square.col)
-            return [square_in_front]
+            if board.get_piece(square_in_front) == None:
+                moves_list.append(square_in_front)
+
+                if self.moved == False:
+                    square_in_front = Square.at(current_square.row + 2, current_square.col)
+                    if board.get_piece(square_in_front) == None:
+                        moves_list.append(square_in_front)
+
+        return moves_list
+
+    def move_to(self, board, new_square):
+        """
+        Move this piece to the given square on the board.
+        """
+        current_square = board.find_piece(self)
+        board.move_piece(current_square, new_square)
+        self.moved = True
 
 
 class Knight(Piece):
