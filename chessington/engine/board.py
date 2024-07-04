@@ -52,6 +52,11 @@ class Board:
                 return True
         return False
 
+    def can_take(self, square, player):
+        if self.in_bounds(square) and self.get_piece(square) != None and self.get_piece(square).player != player:
+            return True
+        return False
+
     def set_piece(self, square, piece):
         """
         Places the piece at the given position on the board.

@@ -331,3 +331,4 @@ class TestPawns:
         # Assert
         assert Square.at(2, 3) not in moves
         assert Square.at(2, 5) not in moves
+

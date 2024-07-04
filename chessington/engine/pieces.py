@@ -47,11 +47,9 @@ class Pawn(Piece):
                 square_in_right = Square.at(current_square.row - 1, current_square.col + 1)
                 square_in_left = Square.at(current_square.row - 1, current_square.col - 1)
 
-
-
-                if board.in_bounds(square_in_right) and board.get_piece(square_in_right) != None and board.get_piece(square_in_right).player != self.player:
+                if board.can_take(square_in_right, self.player):
                     moves_list.append(square_in_right)
-                if board.in_bounds(square_in_left) and board.get_piece(square_in_left) != None and board.get_piece(square_in_left).player != self.player:
+                if board.can_take(square_in_left, self.player):
                     moves_list.append(square_in_left)
 
                 if board.get_piece(square_in_front) == None:
@@ -70,9 +68,9 @@ class Pawn(Piece):
                 square_in_right = Square.at(current_square.row + 1, current_square.col + 1)
                 square_in_left = Square.at(current_square.row + 1, current_square.col - 1)
 
-                if board.in_bounds(square_in_right) and board.get_piece(square_in_right) != None and board.get_piece(square_in_right).player != self.player:
+                if board.can_take(square_in_right, self.player):
                     moves_list.append(square_in_right)
-                if board.in_bounds(square_in_left) and board.get_piece(square_in_left) != None and board.get_piece(square_in_left).player != self.player:
+                if board.can_take(square_in_left, self.player):
                     moves_list.append(square_in_left)
 
                 if board.get_piece(square_in_front) == None:
@@ -101,7 +99,106 @@ class Knight(Piece):
     """
 
     def get_available_moves(self, board):
-        return []
+        moves_list = []
+        current_square = board.find_piece(self)
+
+        # Check the square up left
+        # . * . . .
+        # . . . . .
+        # . . K . .
+        # . . . . .
+        # . . . . .
+        square = Square.at(current_square.row + 2, current_square.col - 1)
+
+        if board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+
+        # Check the square up right
+        # . . . * .
+        # . . . . .
+        # . . K . .
+        # . . . . .
+        # . . . . .
+        square = Square.at(current_square.row + 2, current_square.col + 1)
+
+        if board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+
+        # Check the square sideways right up
+        # . . . . .
+        # . . . . *
+        # . . K . .
+        # . . . . .
+        # . . . . .
+        square = Square.at(current_square.row + 1, current_square.col + 2)
+
+        if board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+
+        # Check the square sideways right down
+        # . . . . .
+        # . . . . .
+        # . . K . .
+        # . . . . *
+        # . . . . .
+        square = Square.at(current_square.row - 1, current_square.col + 2)
+
+        if board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+
+        # Check the square down left
+        # . . . . .
+        # . . . . .
+        # . . K . .
+        # . . . . .
+        # . * . . .
+        square = Square.at(current_square.row - 2, current_square.col - 1)
+
+        if board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+
+        # Check the square down right
+        # . . . . .
+        # . . . . .
+        # . . K . .
+        # . . . . .
+        # . . . * .
+        square = Square.at(current_square.row - 2, current_square.col + 1)
+
+        if board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+
+        # Check the square sideways left up
+        # . . . . .
+        # * . . . .
+        # . . K . .
+        # . . . . .
+        # . . . . .
+        square = Square.at(current_square.row + 1, current_square.col - 2)
+
+        if board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+
+        # Check the square sideways left down
+        # . . . . .
+        # . . . . .
+        # . . K . .
+        # * . . . .
+        # . . . . .
+        square = Square.at(current_square.row - 1, current_square.col - 2)
+
+        if board.in_bounds(square):
+            if board.get_piece(square) == None or board.can_take(square, self.player):
+                moves_list.append(square)
+
+        return moves_list
 
 
 class Bishop(Piece):
