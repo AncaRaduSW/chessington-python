@@ -52,7 +52,7 @@ class Pawn(Piece):
             for side_direction in ['EAST', 'WEST']:
                 square_at_front_and_side = Square.at(square_in_front.row + Directions.Cardinals[side_direction]['row'],
                                            square_in_front.col + Directions.Cardinals[side_direction]['col'])
-                if board.can_take(square_at_front_and_side, self.player):
+                if board.can_take(square_at_front_and_side, self.player) and not board.is_it_king(square_at_front_and_side):
                     moves_list.append(square_at_front_and_side)
 
             if board.get_piece(square_in_front) is None:
@@ -76,7 +76,7 @@ class Pawn(Piece):
                         en_passant_pawn = board.get_piece(square_at_side)
                         if en_passant_pawn.just_moved_2_squares:
                             moves_list.append(square_at_front_and_side)
-            # En-
+            # En-Passant end
 
         return moves_list
 
@@ -115,7 +115,7 @@ class Knight(Piece):
             square = Square.at(current_square.row + Directions.KnightDirections[direction]['row'],
                                current_square.col + Directions.KnightDirections[direction]['col'])
             if board.in_bounds(square):
-                if board.get_piece(square) is None or board.can_take(square, self.player):
+                if board.get_piece(square) is None or (board.can_take(square, self.player) and not board.is_it_king(square)):
                     moves_list.append(square)
 
         return moves_list
@@ -134,7 +134,7 @@ class Bishop(Piece):
 
             square = Square.at(current_square.row + Directions.Corners[direction]['row'], current_square.col + Directions.Corners[direction]['col'])
             while board.in_bounds(square):
-                if board.can_take(square, self.player):
+                if board.can_take(square, self.player) and not board.is_it_king(square):
                     moves_list.append(square)
                     break
                 elif board.get_piece(square) is None:
@@ -161,7 +161,7 @@ class Rook(Piece):
             square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
                                current_square.col + Directions.Cardinals[direction]['col'])
             while board.in_bounds(square):
-                if board.can_take(square, self.player):
+                if board.can_take(square, self.player) and not board.is_it_king(square):
                     moves_list.append(square)
                     break
                 elif board.get_piece(square) is None:
@@ -189,7 +189,7 @@ class Queen(Piece):
             square = Square.at(current_square.row + Directions.Corners[direction]['row'],
                                current_square.col + Directions.Corners[direction]['col'])
             while board.in_bounds(square):
-                if board.can_take(square, self.player):
+                if board.can_take(square, self.player) and not board.is_it_king(square):
                     moves_list.append(square)
                     break
                 elif board.get_piece(square) is None:
@@ -205,7 +205,7 @@ class Queen(Piece):
             square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
                                current_square.col + Directions.Cardinals[direction]['col'])
             while board.in_bounds(square):
-                if board.can_take(square, self.player):
+                if board.can_take(square, self.player) and not board.is_it_king(square):
                     moves_list.append(square)
                     break
                 elif board.get_piece(square) is None:

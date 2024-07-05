@@ -78,6 +78,11 @@ class Board:
                     return Square.at(row, col)
         raise Exception('The supplied piece is not on the board')
 
+    def is_it_king(self, square):
+        piece = self.get_piece(square)
+
+        return type(piece) is King
+
     def move_is_diagonal(self, from_square, to_square):
         return abs(from_square.row - to_square.row) == 1 and abs(from_square.col - to_square.col) == 1
 
@@ -94,9 +99,10 @@ class Board:
         moving_piece = self.get_piece(from_square)
         final_piece = self.get_piece(to_square)
 
-        # En passant start
         if moving_piece.player == self.current_player:
             if type(moving_piece) is Pawn:
+
+                # En passant start
                 if self.move_is_diagonal(from_square, to_square):
                     side_direction = self.get_side_direction_from_diagonal(from_square, to_square)
                     square_at_side = Square.at(from_square.row,
@@ -105,9 +111,17 @@ class Board:
 
                     if final_piece is None and type(piece_at_side) is Pawn:
                         self.set_piece(square_at_side, None)
-        # En passant end
+                # En passant end
+
 
             if moving_piece is not None:
-                self.set_piece(to_square, moving_piece)
+
+                # Pawn Promotion
+                if moving_piece.player == Player.BLACK and to_square.row == 0:
+                    self.set_piece(to_square, Queen(moving_piece.player))
+                elif moving_piece.player == Player.WHITE and to_square.row == 7:
+                    self.set_piece(to_square, Queen(moving_piece.player))
+                else:
+                    self.set_piece(to_square, moving_piece)
                 self.set_piece(from_square, None)
                 self.current_player = self.current_player.opponent()
