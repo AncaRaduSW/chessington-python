@@ -38,8 +38,10 @@ class Pawn(Piece):
     A class representing a chess pawn.
     """
     moved = False
+    just_moved_2_squares = False
 
     def get_moves_for_certain_player(self, board, direction):
+
         moves_list = []
         current_square = board.find_piece(self)
 
@@ -47,22 +49,35 @@ class Pawn(Piece):
         square_in_front = Square.at(current_square.row + Directions.Cardinals[direction]['row'], current_square.col + Directions.Cardinals[direction]['col'])
         if board.in_bounds(square_in_front):
 
-            square_in_right = Square.at(square_in_front.row + Directions.Cardinals['EAST']['row'], square_in_front.col + Directions.Cardinals['EAST']['col'])
-            square_in_left = Square.at(square_in_front.row + Directions.Cardinals['WEST']['row'], square_in_front.col + Directions.Cardinals['WEST']['col'])
+            for side_direction in ['EAST', 'WEST']:
+                square_at_front_and_side = Square.at(square_in_front.row + Directions.Cardinals[side_direction]['row'],
+                                           square_in_front.col + Directions.Cardinals[side_direction]['col'])
+                if board.can_take(square_at_front_and_side, self.player):
+                    moves_list.append(square_at_front_and_side)
 
-            if board.can_take(square_in_right, self.player):
-                moves_list.append(square_in_right)
-            if board.can_take(square_in_left, self.player):
-                moves_list.append(square_in_left)
-
-            if board.get_piece(square_in_front) == None:
+            if board.get_piece(square_in_front) is None:
                 moves_list.append(square_in_front)
 
                 # Check the square two below
-                if self.moved == False:
+                if not self.moved:
                     square_2_in_front = Square.at(square_in_front.row + Directions.Cardinals[direction]['row'], square_in_front.col + Directions.Cardinals[direction]['col'])
-                    if board.in_bounds(square_2_in_front) and board.get_piece(square_2_in_front) == None:
+                    if board.in_bounds(square_2_in_front) and board.get_piece(square_2_in_front) is None:
                         moves_list.append(square_2_in_front)
+
+            # En-Passant start
+            for direction in ['EAST', 'WEST']:
+                square_at_front_and_side = Square.at(square_in_front.row + Directions.Cardinals[direction]['row'],
+                                                     square_in_front.col + Directions.Cardinals[direction]['col'])
+
+                if board.in_bounds(square_at_front_and_side) and board.get_piece(square_at_front_and_side) is None:
+                    square_at_side = Square.at(current_square.row + Directions.Cardinals[direction]['row'], current_square.col + Directions.Cardinals[direction]['col'])
+
+                    if type(board.get_piece(square_at_side)) is Pawn:
+                        en_passant_pawn = board.get_piece(square_at_side)
+                        if en_passant_pawn.just_moved_2_squares:
+                            moves_list.append(square_at_front_and_side)
+            # En-
+
         return moves_list
 
     def get_available_moves(self, board) -> List[Square]:
@@ -77,6 +92,13 @@ class Pawn(Piece):
         """
         current_square = board.find_piece(self)
         board.move_piece(current_square, new_square)
+
+
+        if abs(current_square.row - new_square.row) == 2:
+            self.just_moved_2_squares = True
+        else:
+            self.just_moved_2_squares = False
+
         self.moved = True
 
 
