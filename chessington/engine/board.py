@@ -2,9 +2,12 @@
 A module providing a representation of a chess board. The rules of chess are not implemented - 
 this is just a "dumb" board that will let you move pieces around as you like.
 """
+from PIL.ImageCms import Direction
 
 from chessington.engine.data import Player, Square
+from chessington.engine.directions import Directions
 from chessington.engine.pieces import Pawn, Knight, Bishop, Rook, Queen, King
+from chessington.engine.directions import Directions
 
 BOARD_SIZE = 8
 
@@ -47,15 +50,12 @@ class Board:
         return board
 
     def in_bounds(self, square):
-        if square.row < BOARD_SIZE and square.col < BOARD_SIZE:
-            if square.row > -1 and square.col > -1:
-                return True
+        if -1 < square.row < BOARD_SIZE and -1 < square.col < BOARD_SIZE:
+            return True
         return False
 
     def can_take(self, square, player):
-        if self.in_bounds(square) and self.get_piece(square) != None and self.get_piece(square).player != player:
-            return True
-        return False
+        return self.in_bounds(square) and self.get_piece(square) != None and self.get_piece(square).player != player
 
     def set_piece(self, square, piece):
         """
@@ -68,6 +68,16 @@ class Board:
         Retrieves the piece from the given square of the board.
         """
         return self.board[square.row][square.col]
+
+    def go(self, square, direction):
+        if direction == Directions.NORTH:
+            return Square(square.row + 1, square.col)
+        elif direction == Directions.SOUTH:
+            return Square(square.row - 1, square.col)
+        elif direction == Directions.EAST:
+            return Square(square.row, square.col + 1)
+        else:
+            return Square(square.row, square.col - 1)
 
     def find_piece(self, piece_to_find):
         """

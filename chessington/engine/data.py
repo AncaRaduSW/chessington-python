@@ -30,3 +30,4 @@ class Square:
         """
 
         return cls(row=row, col=col)
+

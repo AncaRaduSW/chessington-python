@@ -230,7 +230,7 @@ class TestBishops:
         assert Square.at(2, 1) not in moves
 
     @staticmethod
-    def test_BLACK_bishop_cannot_move_up_right_corner_if_BLACK_piece_is_in_way():
+    def test_black_bishop_cannot_move_up_right_corner_if_black_piece_is_in_way():
         # Arrange
         board = Board.empty()
         bishop = Bishop(Player.BLACK)
@@ -248,7 +248,7 @@ class TestBishops:
         assert Square.at(4, 4) not in moves
 
     @staticmethod
-    def test_BLACK_bishop_cannot_move_up_left_corner_if_BLACK_piece_is_in_way():
+    def test_black_bishop_cannot_move_up_left_corner_if_black_piece_is_in_way():
         # Arrange
         board = Board.empty()
         bishop = Bishop(Player.BLACK)
@@ -266,7 +266,7 @@ class TestBishops:
         assert Square.at(4, 2) not in moves
 
     @staticmethod
-    def test_BLACK_bishop_cannot_move_down_right_corner_if_BLACK_piece_is_in_way():
+    def test_black_bishop_cannot_move_down_right_corner_if_black_piece_is_in_way():
         # Arrange
         board = Board.empty()
         bishop = Bishop(Player.BLACK)
@@ -284,7 +284,7 @@ class TestBishops:
         assert Square.at(2, 4) not in moves
 
     @staticmethod
-    def test_BLACK_bishop_cannot_move_down_left_corner_if_BLACK_piece_is_in_way():
+    def test_black_bishop_cannot_move_down_left_corner_if_black_piece_is_in_way():
         # Arrange
         board = Board.empty()
         bishop = Bishop(Player.BLACK)

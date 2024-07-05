@@ -2,11 +2,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from chessington.engine.data import Player, Square
 from typing import TYPE_CHECKING, List
+from chessington.engine.directions import Directions
 
 BOARD_SIZE = 8
 
 if TYPE_CHECKING:
     from chessington.engine.board import Board
+
 
 class Piece(ABC):
     """
@@ -37,54 +39,37 @@ class Pawn(Piece):
     """
     moved = False
 
-    def get_available_moves(self, board) -> List[Square]:
+    def get_moves_for_certain_player(self, board, direction):
         moves_list = []
         current_square = board.find_piece(self)
 
-        if self.player == Player.BLACK:
-            # Check the square one below
-            square_in_front = Square.at(current_square.row - 1, current_square.col)
-            if board.in_bounds(square_in_front):
+        # Check the square one below
+        square_in_front = Square.at(current_square.row + Directions.Cardinals[direction]['row'], current_square.col + Directions.Cardinals[direction]['col'])
+        if board.in_bounds(square_in_front):
 
-                square_in_right = Square.at(current_square.row - 1, current_square.col + 1)
-                square_in_left = Square.at(current_square.row - 1, current_square.col - 1)
+            square_in_right = Square.at(square_in_front.row + Directions.Cardinals['EAST']['row'], square_in_front.col + Directions.Cardinals['EAST']['col'])
+            square_in_left = Square.at(square_in_front.row + Directions.Cardinals['WEST']['row'], square_in_front.col + Directions.Cardinals['WEST']['col'])
 
-                if board.can_take(square_in_right, self.player):
-                    moves_list.append(square_in_right)
-                if board.can_take(square_in_left, self.player):
-                    moves_list.append(square_in_left)
+            if board.can_take(square_in_right, self.player):
+                moves_list.append(square_in_right)
+            if board.can_take(square_in_left, self.player):
+                moves_list.append(square_in_left)
 
-                if board.get_piece(square_in_front) == None:
-                    moves_list.append(square_in_front)
+            if board.get_piece(square_in_front) == None:
+                moves_list.append(square_in_front)
 
-                    # Check the square two below
-                    if self.moved == False:
-                        square_in_front = Square.at(current_square.row - 2, current_square.col)
-                        if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
-                            moves_list.append(square_in_front)
-        else:
-            # Check the square one above
-            square_in_front = Square.at(current_square.row + 1, current_square.col)
-            if board.in_bounds(square_in_front):
-
-                square_in_right = Square.at(current_square.row + 1, current_square.col + 1)
-                square_in_left = Square.at(current_square.row + 1, current_square.col - 1)
-
-                if board.can_take(square_in_right, self.player):
-                    moves_list.append(square_in_right)
-                if board.can_take(square_in_left, self.player):
-                    moves_list.append(square_in_left)
-
-                if board.get_piece(square_in_front) == None:
-                    moves_list.append(square_in_front)
-
-                    # Check the square two above
-                    if self.moved == False:
-                        square_in_front = Square.at(current_square.row + 2, current_square.col)
-                        if board.in_bounds(square_in_front) and board.get_piece(square_in_front) == None:
-                            moves_list.append(square_in_front)
-
+                # Check the square two below
+                if self.moved == False:
+                    square_2_in_front = Square.at(square_in_front.row + Directions.Cardinals[direction]['row'], square_in_front.col + Directions.Cardinals[direction]['col'])
+                    if board.in_bounds(square_2_in_front) and board.get_piece(square_2_in_front) == None:
+                        moves_list.append(square_2_in_front)
         return moves_list
+
+    def get_available_moves(self, board) -> List[Square]:
+        if self.player == Player.BLACK:
+            return self.get_moves_for_certain_player(board, 'SOUTH')
+        else:
+            return self.get_moves_for_certain_player(board, 'NORTH')
 
     def move_to(self, board, new_square):
         """
@@ -104,101 +89,12 @@ class Knight(Piece):
         moves_list = []
         current_square = board.find_piece(self)
 
-        # Check the square up left
-        # . * . . .
-        # . . . . .
-        # . . K . .
-        # . . . . .
-        # . . . . .
-        square = Square.at(current_square.row + 2, current_square.col - 1)
-
-        if board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-
-        # Check the square up right
-        # . . . * .
-        # . . . . .
-        # . . K . .
-        # . . . . .
-        # . . . . .
-        square = Square.at(current_square.row + 2, current_square.col + 1)
-
-        if board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-
-        # Check the square sideways right up
-        # . . . . .
-        # . . . . *
-        # . . K . .
-        # . . . . .
-        # . . . . .
-        square = Square.at(current_square.row + 1, current_square.col + 2)
-
-        if board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-
-        # Check the square sideways right down
-        # . . . . .
-        # . . . . .
-        # . . K . .
-        # . . . . *
-        # . . . . .
-        square = Square.at(current_square.row - 1, current_square.col + 2)
-
-        if board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-
-        # Check the square down left
-        # . . . . .
-        # . . . . .
-        # . . K . .
-        # . . . . .
-        # . * . . .
-        square = Square.at(current_square.row - 2, current_square.col - 1)
-
-        if board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-
-        # Check the square down right
-        # . . . . .
-        # . . . . .
-        # . . K . .
-        # . . . . .
-        # . . . * .
-        square = Square.at(current_square.row - 2, current_square.col + 1)
-
-        if board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-
-        # Check the square sideways left up
-        # . . . . .
-        # * . . . .
-        # . . K . .
-        # . . . . .
-        # . . . . .
-        square = Square.at(current_square.row + 1, current_square.col - 2)
-
-        if board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-
-        # Check the square sideways left down
-        # . . . . .
-        # . . . . .
-        # . . K . .
-        # * . . . .
-        # . . . . .
-        square = Square.at(current_square.row - 1, current_square.col - 2)
-
-        if board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
+        for direction in Directions.KnightDirections:
+            square = Square.at(current_square.row + Directions.KnightDirections[direction]['row'],
+                               current_square.col + Directions.KnightDirections[direction]['col'])
+            if board.in_bounds(square):
+                if board.get_piece(square) is None or board.can_take(square, self.player):
+                    moves_list.append(square)
 
         return moves_list
 
@@ -212,61 +108,19 @@ class Bishop(Piece):
         moves_list = []
         current_square = board.find_piece(self)
 
-        # Go up right
-        row = current_square.row + 1
-        col = current_square.col + 1
-        square = Square.at(row, col)
-        while board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-            else:
-                break
+        for direction in Directions.BishopDirections:
 
-            row += 1
-            col += 1
-            square = Square.at(row, col)
+            square = Square.at(current_square.row + Directions.BishopDirections[direction]['row'], current_square.col + Directions.BishopDirections[direction]['col'])
+            while board.in_bounds(square):
+                if board.can_take(square, self.player):
+                    moves_list.append(square)
+                    break
+                elif board.get_piece(square) is None:
+                    moves_list.append(square)
+                else:
+                    break
 
-        # Go up left
-        row = current_square.row + 1
-        col = current_square.col - 1
-        square = Square.at(row, col)
-        while board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-            else:
-                break
-
-            row += 1
-            col -= 1
-            square = Square.at(row, col)
-
-        # Go down right
-        row = current_square.row - 1
-        col = current_square.col + 1
-        square = Square.at(row, col)
-        while board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-            else:
-                break
-
-            row -= 1
-            col += 1
-            square = Square.at(row, col)
-
-        # Go down left
-        row = current_square.row - 1
-        col = current_square.col - 1
-        square = Square.at(row, col)
-        while board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-            else:
-                break
-
-            row -= 1
-            col -= 1
-            square = Square.at(row, col)
+                square = Square.at(square.row + Directions.BishopDirections[direction]['row'], square.col + Directions.BishopDirections[direction]['col'])
 
         return moves_list
 
@@ -280,57 +134,21 @@ class Rook(Piece):
         moves_list = []
         current_square = board.find_piece(self)
 
-        # Go up
-        row = current_square.row + 1
-        col = current_square.col
-        square = Square.at(row, col)
-        while board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-            else:
-                break
+        for direction in Directions.Cardinals:
 
-            row += 1
-            square = Square.at(row, col)
+            square = Square.at(current_square.row + Directions.BishopDirections[direction]['row'],
+                               current_square.col + Directions.BishopDirections[direction]['col'])
+            while board.in_bounds(square):
+                if board.can_take(square, self.player):
+                    moves_list.append(square)
+                    break
+                elif board.get_piece(square) is None:
+                    moves_list.append(square)
+                else:
+                    break
 
-        # Go down
-        row = current_square.row - 1
-        col = current_square.col
-        square = Square.at(row, col)
-        while board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-            else:
-                break
-
-            row -= 1
-            square = Square.at(row, col)
-
-        # Go right
-        row = current_square.row
-        col = current_square.col + 1
-        square = Square.at(row, col)
-        while board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-            else:
-                break
-
-            col += 1
-            square = Square.at(row, col)
-
-        # Go left
-        row = current_square.row
-        col = current_square.col - 1
-        square = Square.at(row, col)
-        while board.in_bounds(square):
-            if board.get_piece(square) == None or board.can_take(square, self.player):
-                moves_list.append(square)
-            else:
-                break
-
-            col -= 1
-            square = Square.at(row, col)
+                square = Square.at(square.row + Directions.BishopDirections[direction]['row'],
+                                   square.col + Directions.BishopDirections[direction]['col'])
 
         return moves_list
 

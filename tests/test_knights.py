@@ -224,7 +224,7 @@ class TestKnights:
 
 
     @staticmethod
-    def test_WHITE_Knight_can_capture():
+    def test_white_Knight_can_capture():
         # Arrange
         board = Board.empty()
         knight = Knight(Player.WHITE)
