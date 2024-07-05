@@ -203,4 +203,23 @@ class King(Piece):
     """
 
     def get_available_moves(self, board):
-        return []
+        moves_list = []
+        current_square = board.find_piece(self)
+
+        for direction in Directions.Corners:
+
+            square = Square.at(current_square.row + Directions.Corners[direction]['row'],
+                               current_square.col + Directions.Corners[direction]['col'])
+            if board.in_bounds(square):
+                if board.get_piece(square) is None or board.can_take(square, self.player):
+                    moves_list.append(square)
+
+        for direction in Directions.Cardinals:
+
+            square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
+                               current_square.col + Directions.Cardinals[direction]['col'])
+            if board.in_bounds(square):
+                if board.get_piece(square) is None or board.can_take(square, self.player):
+                    moves_list.append(square)
+
+        return moves_list
