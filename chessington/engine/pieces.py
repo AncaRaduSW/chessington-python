@@ -108,9 +108,9 @@ class Bishop(Piece):
         moves_list = []
         current_square = board.find_piece(self)
 
-        for direction in Directions.BishopDirections:
+        for direction in Directions.Corners:
 
-            square = Square.at(current_square.row + Directions.BishopDirections[direction]['row'], current_square.col + Directions.BishopDirections[direction]['col'])
+            square = Square.at(current_square.row + Directions.Corners[direction]['row'], current_square.col + Directions.Corners[direction]['col'])
             while board.in_bounds(square):
                 if board.can_take(square, self.player):
                     moves_list.append(square)
@@ -120,7 +120,7 @@ class Bishop(Piece):
                 else:
                     break
 
-                square = Square.at(square.row + Directions.BishopDirections[direction]['row'], square.col + Directions.BishopDirections[direction]['col'])
+                square = Square.at(square.row + Directions.Corners[direction]['row'], square.col + Directions.Corners[direction]['col'])
 
         return moves_list
 
@@ -136,8 +136,8 @@ class Rook(Piece):
 
         for direction in Directions.Cardinals:
 
-            square = Square.at(current_square.row + Directions.BishopDirections[direction]['row'],
-                               current_square.col + Directions.BishopDirections[direction]['col'])
+            square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
+                               current_square.col + Directions.Cardinals[direction]['col'])
             while board.in_bounds(square):
                 if board.can_take(square, self.player):
                     moves_list.append(square)
@@ -147,8 +147,8 @@ class Rook(Piece):
                 else:
                     break
 
-                square = Square.at(square.row + Directions.BishopDirections[direction]['row'],
-                                   square.col + Directions.BishopDirections[direction]['col'])
+                square = Square.at(square.row + Directions.Cardinals[direction]['row'],
+                                   square.col + Directions.Cardinals[direction]['col'])
 
         return moves_list
 
@@ -159,7 +159,42 @@ class Queen(Piece):
     """
 
     def get_available_moves(self, board):
-        return []
+        moves_list = []
+        current_square = board.find_piece(self)
+
+        for direction in Directions.Corners:
+
+            square = Square.at(current_square.row + Directions.Corners[direction]['row'],
+                               current_square.col + Directions.Corners[direction]['col'])
+            while board.in_bounds(square):
+                if board.can_take(square, self.player):
+                    moves_list.append(square)
+                    break
+                elif board.get_piece(square) is None:
+                    moves_list.append(square)
+                else:
+                    break
+
+                square = Square.at(square.row + Directions.Corners[direction]['row'],
+                                   square.col + Directions.Corners[direction]['col'])
+
+        for direction in Directions.Cardinals:
+
+            square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
+                               current_square.col + Directions.Cardinals[direction]['col'])
+            while board.in_bounds(square):
+                if board.can_take(square, self.player):
+                    moves_list.append(square)
+                    break
+                elif board.get_piece(square) is None:
+                    moves_list.append(square)
+                else:
+                    break
+
+                square = Square.at(square.row + Directions.Cardinals[direction]['row'],
+                                   square.col + Directions.Cardinals[direction]['col'])
+
+        return moves_list
 
 
 class King(Piece):

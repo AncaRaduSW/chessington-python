@@ -18,7 +18,7 @@ class Directions:
         "WEST_RIGHT": {"row": 1, "col": -2}
     }
 
-    BishopDirections = {
+    Corners = {
         "NORTH_WEST": {"row": 1, "col": -1},
         "NORTH_EAST": {"row": 1, "col": 1},
         "SOUTH_WEST": {"row": -1, "col": -1},
