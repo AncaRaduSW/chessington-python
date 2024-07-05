@@ -52,7 +52,7 @@ class Pawn(Piece):
             for side_direction in ['EAST', 'WEST']:
                 square_at_front_and_side = Square.at(square_in_front.row + Directions.Cardinals[side_direction]['row'],
                                            square_in_front.col + Directions.Cardinals[side_direction]['col'])
-                if board.can_take(square_at_front_and_side, self.player) and not board.is_it_king(square_at_front_and_side):
+                if board.can_take(square_at_front_and_side, self.player):
                     moves_list.append(square_at_front_and_side)
 
             if board.get_piece(square_in_front) is None:
@@ -115,7 +115,7 @@ class Knight(Piece):
             square = Square.at(current_square.row + Directions.KnightDirections[direction]['row'],
                                current_square.col + Directions.KnightDirections[direction]['col'])
             if board.in_bounds(square):
-                if board.get_piece(square) is None or (board.can_take(square, self.player) and not board.is_it_king(square)):
+                if board.get_piece(square) is None or board.can_take(square, self.player):
                     moves_list.append(square)
 
         return moves_list
@@ -134,7 +134,7 @@ class Bishop(Piece):
 
             square = Square.at(current_square.row + Directions.Corners[direction]['row'], current_square.col + Directions.Corners[direction]['col'])
             while board.in_bounds(square):
-                if board.can_take(square, self.player) and not board.is_it_king(square):
+                if board.can_take(square, self.player):
                     moves_list.append(square)
                     break
                 elif board.get_piece(square) is None:
@@ -161,7 +161,7 @@ class Rook(Piece):
             square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
                                current_square.col + Directions.Cardinals[direction]['col'])
             while board.in_bounds(square):
-                if board.can_take(square, self.player) and not board.is_it_king(square):
+                if board.can_take(square, self.player):
                     moves_list.append(square)
                     break
                 elif board.get_piece(square) is None:
@@ -189,7 +189,7 @@ class Queen(Piece):
             square = Square.at(current_square.row + Directions.Corners[direction]['row'],
                                current_square.col + Directions.Corners[direction]['col'])
             while board.in_bounds(square):
-                if board.can_take(square, self.player) and not board.is_it_king(square):
+                if board.can_take(square, self.player):
                     moves_list.append(square)
                     break
                 elif board.get_piece(square) is None:
@@ -205,7 +205,7 @@ class Queen(Piece):
             square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
                                current_square.col + Directions.Cardinals[direction]['col'])
             while board.in_bounds(square):
-                if board.can_take(square, self.player) and not board.is_it_king(square):
+                if board.can_take(square, self.player):
                     moves_list.append(square)
                     break
                 elif board.get_piece(square) is None:
@@ -232,16 +232,62 @@ class King(Piece):
 
             square = Square.at(current_square.row + Directions.Corners[direction]['row'],
                                current_square.col + Directions.Corners[direction]['col'])
+
+
             if board.in_bounds(square):
-                if board.get_piece(square) is None or board.can_take(square, self.player):
-                    moves_list.append(square)
+                would_be_check = False
+
+                if board.get_piece(square) is None:
+
+                    board.set_piece(square, King(self.player)) # simulate the move
+
+                    for row in range(8):
+                        if would_be_check:
+                            break
+
+                        for col in range(8):
+                            new_piece = board.get_piece(Square.at(row, col))
+                            if new_piece is not None and type(new_piece) is not King and new_piece.player == self.player.opponent():
+                                opp_moves = new_piece.get_available_moves(board)
+                                if square in opp_moves:
+                                    would_be_check = True
+                                    break
+
+                    board.set_piece(square, None)
+
+                if not would_be_check:
+                    if board.get_piece(square) is None or board.can_take(square, self.player):
+                        moves_list.append(square)
 
         for direction in Directions.Cardinals:
 
             square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
                                current_square.col + Directions.Cardinals[direction]['col'])
+
             if board.in_bounds(square):
-                if board.get_piece(square) is None or board.can_take(square, self.player):
-                    moves_list.append(square)
+                would_be_check = False
+
+                if board.get_piece(square) is None:
+
+                    board.set_piece(square, King(self.player))  # simulate the move
+
+                    for row in range(8):
+                        if would_be_check:
+                            break
+
+                        for col in range(8):
+                            new_piece = board.get_piece(Square.at(row, col))
+                            if new_piece is not None and type(
+                                    new_piece) is not King and new_piece.player == self.player.opponent():
+                                opp_moves = new_piece.get_available_moves(board)
+                                if square in opp_moves:
+                                    would_be_check = True
+                                    break
+
+                    board.set_piece(square, None)
+
+                if not would_be_check:
+                    if board.get_piece(square) is None or board.can_take(square, self.player):
+                        moves_list.append(square)
 
         return moves_list

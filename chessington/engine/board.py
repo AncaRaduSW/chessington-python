@@ -113,7 +113,6 @@ class Board:
                         self.set_piece(square_at_side, None)
                 # En passant end
 
-
             if moving_piece is not None:
 
                 # Pawn Promotion
