@@ -2,11 +2,15 @@
 A module providing a representation of a chess board. The rules of chess are not implemented - 
 this is just a "dumb" board that will let you move pieces around as you like.
 """
+from PIL.ImageCms import Direction
 
 from chessington.engine.data import Player, Square
-from chessington.engine.pieces import Pawn, Knight, Bishop, Rook, Queen, King
+from chessington.engine.directions import Directions
+from chessington.engine.pieces import Pawn, Knight, Bishop, Rook, Queen, King, Piece
+from chessington.engine.directions import Directions
 
 BOARD_SIZE = 8
+
 
 class Board:
     """
@@ -46,6 +50,12 @@ class Board:
 
         return board
 
+    def in_bounds(self, square):
+        return -1 < square.row < BOARD_SIZE and -1 < square.col < BOARD_SIZE
+
+    def can_take(self, square, player):
+        return self.in_bounds(square) and self.get_piece(square) != None and self.get_piece(square).player != player
+
     def set_piece(self, square, piece):
         """
         Places the piece at the given position on the board.
@@ -68,12 +78,49 @@ class Board:
                     return Square.at(row, col)
         raise Exception('The supplied piece is not on the board')
 
+    def is_it_king(self, square):
+        piece = self.get_piece(square)
+
+        return type(piece) is King
+
+    def move_is_diagonal(self, from_square, to_square):
+        return abs(from_square.row - to_square.row) == 1 and abs(from_square.col - to_square.col) == 1
+
+    def get_side_direction_from_diagonal(self, from_square, to_square):
+        if to_square.col - from_square.col > 0:
+            return 'EAST'
+        else:
+            return 'WEST'
+
     def move_piece(self, from_square, to_square):
         """
         Moves the piece from the given starting square to the given destination square.
         """
         moving_piece = self.get_piece(from_square)
-        if moving_piece is not None and moving_piece.player == self.current_player:
-            self.set_piece(to_square, moving_piece)
-            self.set_piece(from_square, None)
-            self.current_player = self.current_player.opponent()
+        final_piece = self.get_piece(to_square)
+
+        if moving_piece.player == self.current_player:
+            if type(moving_piece) is Pawn:
+
+                # En passant start
+                if self.move_is_diagonal(from_square, to_square):
+                    side_direction = self.get_side_direction_from_diagonal(from_square, to_square)
+                    square_at_side = Square.at(from_square.row,
+                                               from_square.col + Directions.Cardinals[side_direction]['col'])
+                    piece_at_side = self.get_piece(square_at_side)
+
+                    if final_piece is None and type(piece_at_side) is Pawn:
+                        self.set_piece(square_at_side, None)
+                # En passant end
+
+            if moving_piece is not None:
+
+                # Pawn Promotion
+                if moving_piece.player == Player.BLACK and to_square.row == 0:
+                    self.set_piece(to_square, Queen(moving_piece.player))
+                elif moving_piece.player == Player.WHITE and to_square.row == 7:
+                    self.set_piece(to_square, Queen(moving_piece.player))
+                else:
+                    self.set_piece(to_square, moving_piece)
+                self.set_piece(from_square, None)
+                self.current_player = self.current_player.opponent()

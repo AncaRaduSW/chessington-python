@@ -2,9 +2,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from chessington.engine.data import Player, Square
 from typing import TYPE_CHECKING, List
+from chessington.engine.directions import Directions
+
+BOARD_SIZE = 8
 
 if TYPE_CHECKING:
     from chessington.engine.board import Board
+
 
 class Piece(ABC):
     """
@@ -33,14 +37,69 @@ class Pawn(Piece):
     """
     A class representing a chess pawn.
     """
-    def get_available_moves(self, board) -> List[Square]:
+    moved = False
+    just_moved_2_squares = False
+
+    def get_moves_for_certain_player(self, board, direction):
+
+        moves_list = []
         current_square = board.find_piece(self)
+
+        # Check the square one below
+        square_in_front = Square.at(current_square.row + Directions.Cardinals[direction]['row'], current_square.col + Directions.Cardinals[direction]['col'])
+        if board.in_bounds(square_in_front):
+
+            for side_direction in ['EAST', 'WEST']:
+                square_at_front_and_side = Square.at(square_in_front.row + Directions.Cardinals[side_direction]['row'],
+                                           square_in_front.col + Directions.Cardinals[side_direction]['col'])
+                if board.can_take(square_at_front_and_side, self.player):
+                    moves_list.append(square_at_front_and_side)
+
+            if board.get_piece(square_in_front) is None:
+                moves_list.append(square_in_front)
+
+                # Check the square two below
+                if not self.moved:
+                    square_2_in_front = Square.at(square_in_front.row + Directions.Cardinals[direction]['row'], square_in_front.col + Directions.Cardinals[direction]['col'])
+                    if board.in_bounds(square_2_in_front) and board.get_piece(square_2_in_front) is None:
+                        moves_list.append(square_2_in_front)
+
+            # En-Passant start
+            for direction in ['EAST', 'WEST']:
+                square_at_front_and_side = Square.at(square_in_front.row + Directions.Cardinals[direction]['row'],
+                                                     square_in_front.col + Directions.Cardinals[direction]['col'])
+
+                if board.in_bounds(square_at_front_and_side) and board.get_piece(square_at_front_and_side) is None:
+                    square_at_side = Square.at(current_square.row + Directions.Cardinals[direction]['row'], current_square.col + Directions.Cardinals[direction]['col'])
+
+                    if type(board.get_piece(square_at_side)) is Pawn:
+                        en_passant_pawn = board.get_piece(square_at_side)
+                        if en_passant_pawn.just_moved_2_squares:
+                            moves_list.append(square_at_front_and_side)
+            # En-Passant end
+
+        return moves_list
+
+    def get_available_moves(self, board) -> List[Square]:
         if self.player == Player.BLACK:
-            square_in_front = Square.at(current_square.row - 1, current_square.col)
-            return [square_in_front]
+            return self.get_moves_for_certain_player(board, 'SOUTH')
         else:
-            square_in_front = Square.at(current_square.row + 1, current_square.col)
-            return [square_in_front]
+            return self.get_moves_for_certain_player(board, 'NORTH')
+
+    def move_to(self, board, new_square):
+        """
+        Move this piece to the given square on the board.
+        """
+        current_square = board.find_piece(self)
+        board.move_piece(current_square, new_square)
+
+
+        if abs(current_square.row - new_square.row) == 2:
+            self.just_moved_2_squares = True
+        else:
+            self.just_moved_2_squares = False
+
+        self.moved = True
 
 
 class Knight(Piece):
@@ -49,7 +108,17 @@ class Knight(Piece):
     """
 
     def get_available_moves(self, board):
-        return []
+        moves_list = []
+        current_square = board.find_piece(self)
+
+        for direction in Directions.KnightDirections:
+            square = Square.at(current_square.row + Directions.KnightDirections[direction]['row'],
+                               current_square.col + Directions.KnightDirections[direction]['col'])
+            if board.in_bounds(square):
+                if board.get_piece(square) is None or board.can_take(square, self.player):
+                    moves_list.append(square)
+
+        return moves_list
 
 
 class Bishop(Piece):
@@ -58,7 +127,24 @@ class Bishop(Piece):
     """
 
     def get_available_moves(self, board):
-        return []
+        moves_list = []
+        current_square = board.find_piece(self)
+
+        for direction in Directions.Corners:
+
+            square = Square.at(current_square.row + Directions.Corners[direction]['row'], current_square.col + Directions.Corners[direction]['col'])
+            while board.in_bounds(square):
+                if board.can_take(square, self.player):
+                    moves_list.append(square)
+                    break
+                elif board.get_piece(square) is None:
+                    moves_list.append(square)
+                else:
+                    break
+
+                square = Square.at(square.row + Directions.Corners[direction]['row'], square.col + Directions.Corners[direction]['col'])
+
+        return moves_list
 
 
 class Rook(Piece):
@@ -67,7 +153,26 @@ class Rook(Piece):
     """
 
     def get_available_moves(self, board):
-        return []
+        moves_list = []
+        current_square = board.find_piece(self)
+
+        for direction in Directions.Cardinals:
+
+            square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
+                               current_square.col + Directions.Cardinals[direction]['col'])
+            while board.in_bounds(square):
+                if board.can_take(square, self.player):
+                    moves_list.append(square)
+                    break
+                elif board.get_piece(square) is None:
+                    moves_list.append(square)
+                else:
+                    break
+
+                square = Square.at(square.row + Directions.Cardinals[direction]['row'],
+                                   square.col + Directions.Cardinals[direction]['col'])
+
+        return moves_list
 
 
 class Queen(Piece):
@@ -76,7 +181,42 @@ class Queen(Piece):
     """
 
     def get_available_moves(self, board):
-        return []
+        moves_list = []
+        current_square = board.find_piece(self)
+
+        for direction in Directions.Corners:
+
+            square = Square.at(current_square.row + Directions.Corners[direction]['row'],
+                               current_square.col + Directions.Corners[direction]['col'])
+            while board.in_bounds(square):
+                if board.can_take(square, self.player):
+                    moves_list.append(square)
+                    break
+                elif board.get_piece(square) is None:
+                    moves_list.append(square)
+                else:
+                    break
+
+                square = Square.at(square.row + Directions.Corners[direction]['row'],
+                                   square.col + Directions.Corners[direction]['col'])
+
+        for direction in Directions.Cardinals:
+
+            square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
+                               current_square.col + Directions.Cardinals[direction]['col'])
+            while board.in_bounds(square):
+                if board.can_take(square, self.player):
+                    moves_list.append(square)
+                    break
+                elif board.get_piece(square) is None:
+                    moves_list.append(square)
+                else:
+                    break
+
+                square = Square.at(square.row + Directions.Cardinals[direction]['row'],
+                                   square.col + Directions.Cardinals[direction]['col'])
+
+        return moves_list
 
 
 class King(Piece):
@@ -85,4 +225,69 @@ class King(Piece):
     """
 
     def get_available_moves(self, board):
-        return []
+        moves_list = []
+        current_square = board.find_piece(self)
+
+        for direction in Directions.Corners:
+
+            square = Square.at(current_square.row + Directions.Corners[direction]['row'],
+                               current_square.col + Directions.Corners[direction]['col'])
+
+
+            if board.in_bounds(square):
+                would_be_check = False
+
+                if board.get_piece(square) is None:
+
+                    board.set_piece(square, King(self.player)) # simulate the move
+
+                    for row in range(8):
+                        if would_be_check:
+                            break
+
+                        for col in range(8):
+                            new_piece = board.get_piece(Square.at(row, col))
+                            if new_piece is not None and type(new_piece) is not King and new_piece.player == self.player.opponent():
+                                opp_moves = new_piece.get_available_moves(board)
+                                if square in opp_moves:
+                                    would_be_check = True
+                                    break
+
+                    board.set_piece(square, None)
+
+                if not would_be_check:
+                    if board.get_piece(square) is None or board.can_take(square, self.player):
+                        moves_list.append(square)
+
+        for direction in Directions.Cardinals:
+
+            square = Square.at(current_square.row + Directions.Cardinals[direction]['row'],
+                               current_square.col + Directions.Cardinals[direction]['col'])
+
+            if board.in_bounds(square):
+                would_be_check = False
+
+                if board.get_piece(square) is None:
+
+                    board.set_piece(square, King(self.player))  # simulate the move
+
+                    for row in range(8):
+                        if would_be_check:
+                            break
+
+                        for col in range(8):
+                            new_piece = board.get_piece(Square.at(row, col))
+                            if new_piece is not None and type(
+                                    new_piece) is not King and new_piece.player == self.player.opponent():
+                                opp_moves = new_piece.get_available_moves(board)
+                                if square in opp_moves:
+                                    would_be_check = True
+                                    break
+
+                    board.set_piece(square, None)
+
+                if not would_be_check:
+                    if board.get_piece(square) is None or board.can_take(square, self.player):
+                        moves_list.append(square)
+
+        return moves_list
